@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Result</title>
+    <style>
+      .card {
+        max-height: 300px; /* Set the maximum height */
+        overflow: hidden; /* Hide any overflow */
+        position: relative;
+      }
+
+      .card-body {
+        margin: 0;
+        padding: 0;
+      }
+
+      .card-body p {
+        margin: 0;
+        padding: 0;
+      }
+
+      .card.expanded {
+        max-height: none; /* Remove the maximum height */
+      }
+
+      .card-footer {
+        margin-top: 10px;
+        position:absolute;
+        bottom: 0;
+        right: 10px;
+      }
+      /* Style for tab buttons */
+      .tab {
+        overflow: hidden;
+        border: 1px solid #ccc;
+        background-color: #f1f1f1;
+      }
+
+      /* Style for tab buttons */
+      .tab button {
+        background-color: inherit;
+        float: left;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        padding: 14px 16px;
+        transition: 0.3s;
+        font-size: 17px;
+      }
+
+      /* Style for active tab button */
+      .tab button.active {
+        background-color: #ccc;
+      }
+
+      /* Style for tab content */
+      .tabcontent {
+        display: none;
+        padding: 6px 12px;
+        border: 1px solid #ccc;
+        border-top: none;
+        width: 100%;
+      }
+
+      /* Style for active tab content */
+      .tabcontent.active {
+        display: block;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+
+      th,
+      td {
+        text-align: left;
+        padding: 8px;
+        border-bottom: 1px solid #ddd;
+      }
+
+      th {
+        background-color: #f2f2f2;
+      }
+
+      .positive {
+        color: green;
+      }
+
+      .negative {
+        color: red;
+      }
+
+      .prediction {
+        font-weight: bold;
+        font-size: 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>{{company_name}}({{symbol}})</h1>
+    <div class="tab">
+		{%for date in dates%}
+		<button class="tablinks" onclick="openTab(event,'{{date}}')" id="tablink{{date}}">{{date}}</button>
+		{%endfor%}
+    </div>
+	{%for date in dates%}
+    
+		<div id="{{date}}" class="tabcontent {% if loop.index==0 %}active{% endif %}">
+      <h2>Price Data</h2>
+    <table>
+      <tr>
+        <th>Close</th>
+        <th>High</th>
+        <th>Low</th>
+        <th>Open</th>
+        <th>Volume</th>
+      </tr>
+      <tr>
+        <td>{{ indicators[date]['close'] }}</td>
+        <td>{{ indicators[date]['high'] }}</td>
+        <td>{{ indicators[date]['low'] }}</td>
+        <td>{{ indicators[date]['open'] }}</td>
+        <td>{{ indicators[date]['volume'] }}</td>
+      </tr>
+    </table>
+
+    <h2>Technical Indicators</h2>
+    <table>
+      <tr>
+        <th>Indicator</th>
+        <th>Value</th>
+      </tr>
+      <tr>
+        <td>Last Date when market was open</td>
+        <td>{{ indicators[date]['datetime'] }}</td>
+      </tr>
+      <tr>
+        <td>Change in Price</td>
+        <td>{{ indicators[date]['change_in_price'] }}</td>
+      </tr>
+      <tr>
+        <td>RSI</td>
+        <td>{{ indicators[date]['RSI'] }}</td>
+      </tr>
+      <tr>
+        <td>Low 14</td>
+        <td>{{ indicators[date]['low_14'] }}</td>
+      </tr>
+      <tr>
+        <td>High 14</td>
+        <td>{{ indicators[date]['high_14'] }}</td>
+      </tr>
+      <tr>
+        <td>K Percent</td>
+        <td>{{ indicators[date]['k_percent'] }}</td>
+      </tr>
+      <tr>
+        <td>R Percent</td>
+        <td>{{ indicators[date]['r_percent'] }}</td>
+      </tr>
+      <tr>
+        <td>MACD</td>
+        <td>{{ indicators[date]['MACD'] }}</td>
+      </tr>
+      <tr>
+        <td>Price Rate of Change</td>
+        <td>{{ indicators[date]['Price_Rate_Of_Change'] }}</td>
+      </tr>
+      <tr>
+      <td>On Balance Volume</td>
+      <td>{{ indicators[date]['On Balance Volume'] }}</td>
+      </tr>
+      <tr>
+      <td>Sentiment</td>
+      <td>{{ indicators[date]['sentiment'] }}</td>
+      </tr>
+      </table>
+      <h2>Prediction Data</h2>
+<table>
+  <tr>
+    <th>Prediction Type</th>
+    <th>Value</th>
+  </tr>
+  <tr>
+    <td>2 Class Prediction</td>
+    <td class="{% if indicators[date]['2_class_prediction'] == 1 %}positive{% else %}negative{% endif %} {% if indicators[date]['2_class_prediction'] != -1 %}prediction{% endif %}">
+      {% if indicators[date]['2_class_prediction'] == 1 %}Buy{% elif indicators[date]['2_class_prediction'] == -1 %}Sell{% else %}N/A{% endif %}
+    </td>
+  </tr>
+  <tr>
+    <td>4 Class Prediction(Less accurate)</td>
+    <td class="{% if indicators[date]['4_class_prediction'] == 2 %}positive{% elif indicators[date]['4_class_prediction'] == -2 %}negative{% else %}N/A{% endif %} {% if indicators[date]['4_class_prediction'] != 0 %}prediction{% endif %}">
+      {% if indicators[date]['4_class_prediction'] == 2 %}Strong Buy{% elif indicators[date]['4_class_prediction'] == 1 %}Buy{% elif indicators[date]['4_class_prediction'] == -1 %}Sell{% elif indicators[date]['4_class_prediction'] == -2 %}Strong Sell{% else %}N/A{% endif %}
+    </td>
+  </tr>
+</table>
+      <h2>Articles</h2>
+      {%for article in grouped_articles[date]%}
+      <div style="width:95%;margin-left:10px;margin-right: 10px;" class="card">
+        <h3>{{article['title']}} </h3>
+        <h4>Sentiment Class: {{article['sentiment_class']}}</h4>
+        <a href="{{article['url']}}" style="white-space: nowrap;overflow: hidden; text-overflow: ellipsis;">{{article['url']}}</a>
+        <div style="display:flex;flex-direction: row; justify-content: space-between;">
+          <div style="width:48%;">
+            <h5>Normal Text</h5>
+            <p >{{article['content']}}</p>
+          </div>
+          <hr>
+          <div style="width:48%;">
+            <h5>Coreference Resolved Text</h5>
+            <p >{{article['resolved_text']}}</p>
+            
+          </div>
+         
+        </div>
+        <div class="card-footer" onclick="Expand(this)">
+          <button class="read-more" >Read more</button>
+        </div>
+      </div>
+      {%endfor%}
+	  	</div>
+	{%endfor%}
+    
+    <!-- <div id="Tab2" class="tabcontent">
+      <h3>Tab 2</h3>
+      <p>Content for Tab 2 goes here.</p>
+    </div>
+    <div id="Tab3" class="tabcontent">
+      <h3>Tab 3</h3>
+      <p>Content for Tab 3 goes here.</p>
+    </div> -->
+    <script>
+      // Function to switch between tabs
+      function openTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+          tabcontent[i].className = tabcontent[i].className.replace(
+            " active",
+            ""
+          );
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+          tablinks[i].className = tablinks[i].className.replace(
+            " active",
+            ""
+          );
+        }
+        document.getElementById(tabName).className += " active";
+        evt.currentTarget.className += " active";
+      }
+      // Default tab
+      document.getElementById("{{dates[-1]}}").className += " active";
+      document.getElementById("tablink{{dates[-1]}}").className+= " active"
+      // Get all the "Read more" buttons
+      // var readMoreButtons = document.querySelectorAll('.read-more');
+
+      // // Loop over the buttons and add a click event listener to each one
+      // for (var i = 0; i < readMoreButtons.length; i++) {
+      //   readMoreButtons[i].addEventListener('click', 
+        function Expand(elem) {
+          // Get the card body element
+          var cardBody = elem.parentNode;
+          
+          // Toggle the "expanded" class on the card body
+          cardBody.classList.toggle('expanded');
+          
+          // Change the text of the button
+          if (elem.children[0].innerText == 'Read more') {
+            elem.children[0].innerText = 'Read less';
+          } else {
+            elem.children[0].innerText = 'Read more';
+          }
+        }
+      //   );
+      // }
+
+    </script>
+  </body>
+</html>

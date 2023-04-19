@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>{{ site_name }}</title>
+</head>
+<body>
+	<h1>{{ site_name }}</h1>
+	<hr>
+	<!-- Header section -->
+	<header>
+		<h2>My Website</h2>
+	</header>
+	<!-- Main content -->
+	<main>
+		<!-- Search page content -->
+		<h3>Search for a company</h3>
+		<form method="POST" action="{{ url_for('search') }}">
+			<input type="text" name="company" list="company_list" autocomplete="off" required>
+			<datalist id="company_list">
+				{% for company in company_names %}
+					<option value="{{ company }}"></option>
+				{% endfor %}
+			</datalist>
+			<input type="submit" value="Search">
+		</form>
+	</main>
+</body>
+</html>
